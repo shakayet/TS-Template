@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
+import { JwtPayload } from 'jsonwebtoken';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -41,6 +42,17 @@ const forgetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const resendOtp = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as JwtPayload;
+    const result = await AuthService.resendOtpToDB(user.email);
+    res.status(200).json({ success: true, message: result.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'An error occurred';
+    res.status(400).json({ success: false, message });
+  }
+};
+
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   const token = req.headers.authorization;
   const { ...resetData } = req.body;
@@ -72,4 +84,5 @@ export const AuthController = {
   forgetPassword,
   resetPassword,
   changePassword,
+  resendOtp,
 };
