@@ -25,7 +25,10 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'User logged in successfully.',
-    data: result.createToken,
+    data: {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
   });
 });
 
@@ -48,7 +51,8 @@ const resendOtp = async (req: Request, res: Response) => {
     const result = await AuthService.resendOtpToDB(user.email);
     res.status(200).json({ success: true, message: result.message });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'An error occurred';
+    const message =
+      error instanceof Error ? error.message : 'An error occurred';
     res.status(400).json({ success: false, message });
   }
 };
