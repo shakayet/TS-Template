@@ -25,4 +25,14 @@ export default {
     email: process.env.SUPER_ADMIN_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
   },
+  oauth: {
+    google: {
+      clientID: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+      callbackURL:
+        process.env.GOOGLE_OAUTH_CALLBACK_URL ||
+        'http://localhost:5000/api/v1/oauth/google/callback',
+    },
+    sessionSecret: process.env.SESSION_SECRET || 'your_session_secret_key',
+  },
 };

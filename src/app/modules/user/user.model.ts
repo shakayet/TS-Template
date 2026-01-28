@@ -12,6 +12,14 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       required: true,
     },
+    firstName: {
+      type: String,
+      default: null,
+    },
+    lastName: {
+      type: String,
+      default: null,
+    },
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
@@ -25,13 +33,17 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     password: {
       type: String,
-      required: true,
       select: 0,
       minlength: 8,
+      default: null,
     },
     image: {
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
+    },
+    avatar: {
+      type: String,
+      default: null,
     },
     status: {
       type: String,
@@ -41,6 +53,15 @@ const userSchema = new Schema<IUser, UserModal>(
     verified: {
       type: Boolean,
       default: false,
+    },
+    provider: {
+      type: String,
+      enum: ['local', 'google', 'facebook', 'github'],
+      default: 'local',
+    },
+    providerId: {
+      type: String,
+      default: null,
     },
     authentication: {
       type: {
@@ -60,7 +81,7 @@ const userSchema = new Schema<IUser, UserModal>(
       select: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 //exist user check
@@ -77,7 +98,7 @@ userSchema.statics.isExistUserByEmail = async (email: string) => {
 //is match password
 userSchema.statics.isMatchPassword = async (
   password: string,
-  hashPassword: string
+  hashPassword: string,
 ): Promise<boolean> => {
   return await bcrypt.compare(password, hashPassword);
 };
@@ -90,11 +111,13 @@ userSchema.pre('save', async function (next) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
   }
 
-  //password hash
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds)
-  );
+  //password hash (only for local auth with password)
+  if (this.password && this.isModified('password')) {
+    this.password = await bcrypt.hash(
+      this.password,
+      Number(config.bcrypt_salt_rounds),
+    );
+  }
   next();
 });
 
