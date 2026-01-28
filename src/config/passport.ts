@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
 import passport from 'passport';
 import { User } from '../app/modules/user/user.model';
 import strategies from './strategies';
@@ -41,7 +40,7 @@ export const initializePassport = () => {
 
     try {
       passport.use(strategy);
-      console.log(
+      errorLogger.info(
         `✓ ${name.charAt(0).toUpperCase() + name.slice(1)} OAuth strategy initialized`,
       );
     } catch (error) {
