@@ -6,6 +6,15 @@ import { jwtHelper } from '../../../helpers/jwtHelper';
 import sendResponse from '../../../shared/sendResponse';
 import catchAsync from '../../../shared/catchAsync';
 import { Secret } from 'jsonwebtoken';
+import process from 'process';
+
+type ProcessEnv ={
+  FRONTEND_OAUTH_CALLBACK_URL?: string;
+  GOOGLE_OAUTH_CLIENT_ID?: string;
+  GOOGLE_OAUTH_CLIENT_SECRET?: string;
+}
+
+const env = process.env as unknown as ProcessEnv;
 
 /**
  * OAuth Controller
@@ -18,7 +27,9 @@ import { Secret } from 'jsonwebtoken';
  * Generates JWT tokens for authenticated user
  */
 const googleCallback = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as any;
+  const user = req.user as
+    | { _id: string; role?: string; email: string }
+    | undefined;
 
   if (!user) {
     return sendResponse(res, {
@@ -52,8 +63,7 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
   // Redirect to frontend with tokens
   // In production, redirect to your frontend OAuth success page with tokens
   const frontendCallbackUrl =
-    process.env.FRONTEND_OAUTH_CALLBACK_URL ||
-    'http://localhost:3000/auth/callback';
+    env.FRONTEND_OAUTH_CALLBACK_URL || 'http://localhost:3000/auth/callback';
   const redirectUrl = `${frontendCallbackUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&userId=${user._id}`;
 
   return res.redirect(redirectUrl);
@@ -96,8 +106,7 @@ const getOAuthStatus = catchAsync(async (req: Request, res: Response) => {
   const providers = {
     google: {
       configured: !!(
-        process.env.GOOGLE_OAUTH_CLIENT_ID &&
-        process.env.GOOGLE_OAUTH_CLIENT_SECRET
+        env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
       ),
       name: 'Google',
     },

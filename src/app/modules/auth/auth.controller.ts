@@ -4,6 +4,7 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
 import { JwtPayload } from 'jsonwebtoken';
+import ApiError from '../../../errors/ApiError';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -71,9 +72,12 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const changePassword = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user as JwtPayload | undefined;
   const { ...passwordData } = req.body;
-  await AuthService.changePasswordToDB(user, passwordData);
+  if (!user) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
+  }
+  await AuthService.changePasswordToDB(user as JwtPayload, passwordData);
 
   sendResponse(res, {
     success: true,

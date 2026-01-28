@@ -16,11 +16,11 @@ const createUser = catchAsync(
       message: 'User created successfully',
       data: result,
     });
-  }
+  },
 );
 
 const getUserProfile = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user as any;
   const result = await UserService.getUserProfileFromDB(user);
 
   sendResponse(res, {
@@ -34,7 +34,7 @@ const getUserProfile = catchAsync(async (req: Request, res: Response) => {
 //update profile
 const updateProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
+    const user = req.user as any;
     let image = getSingleFilePath(req.files, 'image');
 
     const data = {
@@ -49,7 +49,7 @@ const updateProfile = catchAsync(
       message: 'Profile updated successfully',
       data: result,
     });
-  }
+  },
 );
 
 export const UserController = { createUser, getUserProfile, updateProfile };
