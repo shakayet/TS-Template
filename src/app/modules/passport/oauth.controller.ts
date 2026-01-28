@@ -8,11 +8,11 @@ import catchAsync from '../../../shared/catchAsync';
 import { Secret } from 'jsonwebtoken';
 import process from 'process';
 
-type ProcessEnv ={
+type ProcessEnv = {
   FRONTEND_OAUTH_CALLBACK_URL?: string;
   GOOGLE_OAUTH_CLIENT_ID?: string;
   GOOGLE_OAUTH_CLIENT_SECRET?: string;
-}
+};
 
 const env = process.env as unknown as ProcessEnv;
 
@@ -26,10 +26,14 @@ const env = process.env as unknown as ProcessEnv;
  * Called after Google verifies the user
  * Generates JWT tokens for authenticated user
  */
+type OAuthUser = {
+  _id: { toString(): string };
+  role?: string;
+  email: string;
+};
+
 const googleCallback = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as
-    | { _id: string; role?: string; email: string }
-    | undefined;
+  const user = req.user as OAuthUser | undefined;
 
   if (!user) {
     return sendResponse(res, {
@@ -39,11 +43,14 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
+  const userId = user._id.toString();
+  const userRole = user.role || 'USER';
+
   // Generate JWT tokens
   const accessToken = jwtHelper.createToken(
     {
-      id: user._id,
-      role: user.role || 'USER',
+      id: userId,
+      role: userRole,
       email: user.email,
     },
     config.jwt.jwt_secret as Secret,
@@ -52,8 +59,8 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
 
   const refreshToken = jwtHelper.createToken(
     {
-      id: user._id,
-      role: user.role || 'USER',
+      id: userId,
+      role: userRole,
       email: user.email,
     },
     config.jwt.jwt_refresh_secret as Secret,
@@ -64,7 +71,7 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
   // In production, redirect to your frontend OAuth success page with tokens
   const frontendCallbackUrl =
     env.FRONTEND_OAUTH_CALLBACK_URL || 'http://localhost:3000/auth/callback';
-  const redirectUrl = `${frontendCallbackUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&userId=${user._id}`;
+  const redirectUrl = `${frontendCallbackUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&userId=${userId}`;
 
   return res.redirect(redirectUrl);
 });
@@ -75,7 +82,7 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
  */
 const getProfile = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload & {
-    _id: string;
+    id: string;
     email: string;
     firstName?: string;
     lastName?: string;

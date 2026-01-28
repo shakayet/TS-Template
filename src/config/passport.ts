@@ -1,9 +1,12 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from 'passport';
 import { User } from '../app/modules/user/user.model';
 import strategies from './strategies';
 import { errorLogger } from '../shared/logger';
+
+import { IUser } from '../app/modules/user/user.interface';
 
 /**
  * Passport Configuration
@@ -12,8 +15,9 @@ import { errorLogger } from '../shared/logger';
  */
 
 // Serialize user to session
-passport.serializeUser((user: any, done: (err: any, id?: string) => void) => {
-  done(null, (user as { _id: string })._id);
+passport.serializeUser((user: any, done) => {
+  const userId = ((user as any)._id as { toString(): string }).toString();
+  done(null, userId);
 });
 
 // Deserialize user from session
