@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
 
 const createToken = (

@@ -37,6 +37,7 @@ if (config.oauth.google.clientID && config.oauth.google.clientSecret) {
           user = await User.create({
             email,
             name: displayName || 'User',
+            role: 'USER',
             firstName: displayName?.split(' ')[0] || 'User',
             lastName: displayName?.split(' ').slice(1).join(' ') || '',
             avatar: photos?.[0]?.value,
