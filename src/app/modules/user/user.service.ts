@@ -6,8 +6,23 @@ import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
+import QueryBuilder from '../../builder/QueryBuilder';
 import { IUser } from './user.interface';
 import { User } from './user.model';
+
+const getAllUsersToDB = async (query: Record<string, unknown>) => {
+  const userQuery = new QueryBuilder(User.find(), query)
+    .search(['name', 'email', 'contact'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await userQuery.modelQuery;
+  const meta = await userQuery.getPaginationInfo();
+
+  return { result, meta };
+};
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
@@ -34,14 +49,14 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   };
   await User.findOneAndUpdate(
     { _id: createUser._id },
-    { $set: { authentication } }
+    { $set: { authentication } },
   );
 
   return createUser;
 };
 
 const getUserProfileFromDB = async (
-  user: JwtPayload
+  user: JwtPayload,
 ): Promise<Partial<IUser>> => {
   const { id } = user;
   const isExistUser = await User.isExistUserById(id);
@@ -54,7 +69,7 @@ const getUserProfileFromDB = async (
 
 const updateProfileToDB = async (
   user: JwtPayload,
-  payload: Partial<IUser>
+  payload: Partial<IUser>,
 ): Promise<Partial<IUser | null>> => {
   const { id } = user;
   const isExistUser = await User.isExistUserById(id);
@@ -75,6 +90,7 @@ const updateProfileToDB = async (
 };
 
 export const UserService = {
+  getAllUsersToDB,
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,

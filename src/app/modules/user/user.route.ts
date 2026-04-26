@@ -9,25 +9,32 @@ const router = express.Router();
 
 router
   .route('/profile')
-  .get(auth(USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserProfile)
+  .get(
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+    UserController.getUserProfile,
+  )
   .patch(
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER),
     fileUploadHandler(),
     (req: Request, res: Response, next: NextFunction) => {
       if (req.body.data) {
         req.body = UserValidation.updateUserZodSchema.parse(
-          JSON.parse(req.body.data)
+          JSON.parse(req.body.data),
         );
       }
       return UserController.updateProfile(req, res, next);
-    }
+    },
   );
 
 router
   .route('/')
+  .get(
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+    UserController.getAllUsers,
+  )
   .post(
     validateRequest(UserValidation.createUserZodSchema),
-    UserController.createUser
+    UserController.createUser,
   );
 
 export const UserRoutes = router;

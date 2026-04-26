@@ -1,9 +1,25 @@
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import { getSingleFilePath } from '../../../shared/getFilePath';
 import sendResponse from '../../../shared/sendResponse';
 import { UserService } from './user.service';
+
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.getAllUsersToDB(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users retrieved successfully',
+    pagination: result.meta,
+    data: result.result,
+  });
+});
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -52,4 +68,9 @@ const updateProfile = catchAsync(
   },
 );
 
-export const UserController = { createUser, getUserProfile, updateProfile };
+export const UserController = {
+  getAllUsers,
+  createUser,
+  getUserProfile,
+  updateProfile,
+};
