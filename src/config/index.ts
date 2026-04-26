@@ -10,8 +10,10 @@ export default {
   node_env: process.env.NODE_ENV,
   port: process.env.PORT,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
-  project_name: process.env.PROJECT_NAME,
-  brand_logo: process.env.BRAND_LOGO,
+  branding: {
+    projectName: process.env.PROJECT_NAME,
+    logoUrl: process.env.BRAND_LOGO,
+  },
   jwt: {
     jwt_secret: process.env.JWT_SECRET,
     jwt_expire_in: process.env.JWT_EXPIRE_IN,
